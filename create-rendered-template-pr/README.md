@@ -13,7 +13,10 @@ It creates a PR for the updates applied by the `update-rendered-template` action
 
 ## 📤 Outputs
 
-_None_
+|Name                  |Description                                          |
+|----------------------|-----------------------------------------------------|
+|`pull-request-number` |The number of the created pull request.              |
+|`branch-name`         |The name of the branch for the created pull request. |
 
 ## 🚀 Usage
 
