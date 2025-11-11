@@ -32,7 +32,8 @@ jobs:
       with:
         github-token: ${{ steps.generate-token.outputs.token }}
         rendered-repo-path: ${{ env.RENDERED_REPO_PATH }}
-        rendered-template-repo: ${{ github.repository }}
+        rendered-template-repo-owner: ${{ github.repository_owner }}
+        rendered-template-repo: ${{ github.event.repository.name }}
         rendered-template-path: './test/actions-template-test'
         rendered-template-branch: ${{ github.head_ref }}
 
@@ -77,7 +78,8 @@ jobs:
       uses: ./monitor-rendered-template-workflow-status
       with:
         github-token: ${{ steps.generate-token.outputs.token }}
-        rendered-template-repo: ${{ github.repository }}
+        rendered-template-repo-owner: ${{ github.repository_owner }}
+        rendered-template-repo: ${{ github.event.repository.name }}
         rendered-template-workflow: 'template-build.yml'
 
     - name: Clean up rendered template PR & branch

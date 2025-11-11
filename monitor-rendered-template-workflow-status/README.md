@@ -6,11 +6,12 @@ It waits for the workflow to complete and checks whether it succeeded or failed.
 
 ## 🔧 Inputs
 
-|Name                         |Description                                                                                                                                       |Required|Default     |
-|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|--------|------------|
-|`github-token`               |GitHub token for authentication. It must have permissions to read actions in the rendered template repository. A GitHub App token is recommended. |Yes     |            |
-|`rendered-template-repo`     |The rendered template repository to monitor (e.g. `eidp/python-fastapi`).                                                                         |Yes     |            |
-|`rendered-template-workflow` |The workflow file name in the rendered template repository to monitor (e.g. `build.yml`).                                                         |No      |`build.yml` |
+|Name                           |Description                                                                                                                                       |Required|Default     |
+|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|--------|------------|
+|`github-token`                 |GitHub token for authentication. It must have permissions to read actions in the rendered template repository. A GitHub App token is recommended. |Yes     |            |
+|`rendered-template-repo-owner` |The owner of the rendered template repository to monitor (e.g. `eidp`).                                                                           |Yes     |            |
+|`rendered-template-repo`       |The rendered template repository to monitor (e.g. `python-fastapi`).                                                                              |Yes     |            |
+|`rendered-template-workflow`   |The workflow file name in the rendered template repository to monitor (e.g. `build.yml`).                                                         |No      |`build.yml` |
 
 ## 📤 Outputs
 

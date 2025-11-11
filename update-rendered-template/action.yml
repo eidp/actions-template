@@ -17,6 +17,9 @@ inputs:
   github-token:
     description: 'GitHub token for authentication. It must have permissions to read and write to the rendered repository. A GitHub App token is recommended.'
     required: true
+  rendered-template-repo-owner:
+    description: 'The owner of the rendered template repository to update (e.g. `eidp`).'
+    required: true
   rendered-template-repo:
     description: 'The rendered template repository to update (e.g. `eidp/python-fastapi`).'
     required: true
@@ -39,7 +42,7 @@ runs:
   - name: Checkout rendered repository
     uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
     with:
-      repository: ${{ inputs.rendered-template-repo }}
+      repository: ${{ inputs.rendered-template-repo-owner }}/${{ inputs.rendered-template-repo }}
       token: ${{ inputs.github-token }}
       path: rendered-repo
       fetch-depth: '0' # Fetch all history for cruft to work properly

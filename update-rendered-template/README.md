@@ -11,13 +11,14 @@ If manual intervention is required, the action will fail and provide details in 
 
 ## 🔧 Inputs
 
-|Name                       |Description                                                                                                                                                                                  |Required|Default         |
-|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------|
-|`github-token`             |GitHub token for authentication. It must have permissions to read and write to the rendered repository. A GitHub App token is recommended.                                                   |Yes     |                |
-|`rendered-template-repo`   |The rendered template repository to update (e.g. `eidp/python-fastapi`).                                                                                                                     |Yes     |                |
-|`rendered-repo-path`       |Path to clone the rendered repository to.                                                                                                                                                    |No      |`rendered-repo` |
-|`rendered-template-path`   |The path in the rendered template repository where the rendered template files and the .cruft.json file are located. If not specified, the root of the rendered template repository is used. |No      |``              |
-|`rendered-template-branch` |The branch in the rendered template repository to update. If not specified, the default branch of the rendered template repository is used.                                                  |No      |``              |
+|Name                           |Description                                                                                                                                                                                  |Required|Default         |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------|
+|`github-token`                 |GitHub token for authentication. It must have permissions to read and write to the rendered repository. A GitHub App token is recommended.                                                   |Yes     |                |
+|`rendered-template-repo-owner` |The owner of the rendered template repository to update (e.g. `eidp`).                                                                                                                       |Yes     |                |
+|`rendered-template-repo`       |The rendered template repository to update (e.g. `eidp/python-fastapi`).                                                                                                                     |Yes     |                |
+|`rendered-repo-path`           |Path to clone the rendered repository to.                                                                                                                                                    |No      |`rendered-repo` |
+|`rendered-template-path`       |The path in the rendered template repository where the rendered template files and the .cruft.json file are located. If not specified, the root of the rendered template repository is used. |No      |``              |
+|`rendered-template-branch`     |The branch in the rendered template repository to update. If not specified, the default branch of the rendered template repository is used.                                                  |No      |``              |
 
 ## 📤 Outputs
 

@@ -12,8 +12,11 @@ inputs:
   github-token:
     description: 'GitHub token for authentication. It must have permissions to read actions in the rendered template repository. A GitHub App token is recommended.'
     required: true
+  rendered-template-repo-owner:
+    description: 'The owner of the rendered template repository to monitor (e.g. `eidp`).'
+    required: true
   rendered-template-repo:
-    description: 'The rendered template repository to monitor (e.g. `eidp/python-fastapi`).'
+    description: 'The rendered template repository to monitor (e.g. `python-fastapi`).'
     required: true
   rendered-template-workflow:
     description: 'The workflow file name in the rendered template repository to monitor (e.g. `build.yml`).'
@@ -34,7 +37,7 @@ runs:
       set -e
 
       BRANCH="template-update/${{ github.event.pull_request.number }}"
-      REPO="${{ inputs.rendered-template-repo }}"
+      REPO="${{ inputs.rendered-template-repo-owner}}/${{ inputs.rendered-template-repo }}"
       WORKFLOW="${{ inputs.rendered-template-workflow }}"
       TIMEOUT_MINUTES=30
       POLL_INTERVAL=10
