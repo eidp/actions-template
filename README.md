@@ -1,6 +1,6 @@
 # Template actions
 
-This repository contains actions for building EIDP templates 
+This repository contains actions and reusable workflows for building EIDP templates 
 
 <!-- BEGIN ACTIONS -->
 
@@ -13,6 +13,16 @@ The following GitHub Actions are available in this repository:
 - [update-rendered-template](update-rendered-template/README.md)
 
 <!-- END ACTIONS -->
+
+<!-- BEGIN SHARED WORKFLOWS -->
+
+## 📚 Shared Workflows
+
+The following reusable workflows are available in this repository:
+
+- [auto-manage-rendered-template-pr](./.github/workflows/README.md#auto-manage-rendered-template-pr-workflow)
+
+<!-- END SHARED WORKFLOWS -->
 
 ## Development
 
