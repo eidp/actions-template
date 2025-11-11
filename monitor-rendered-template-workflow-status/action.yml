@@ -1,0 +1,95 @@
+name: 'Monitor rendered template workflow status'
+description: |
+  This action monitors the status of the workflow run in the branch that was created as part of the rendered template update process.
+  It waits for the workflow to complete and checks whether it succeeded or failed.
+
+author: EIDP
+branding:
+  color: 'green'
+  icon: 'activity'
+
+inputs:
+  github-token:
+    description: 'GitHub token for authentication. It must have permissions to read actions in the rendered template repository. A GitHub App token is recommended.'
+    required: true
+  rendered-template-repo:
+    description: 'The rendered template repository to monitor (e.g. `eidp/python-fastapi`).'
+    required: true
+  rendered-template-workflow:
+    description: 'The workflow file name in the rendered template repository to monitor (e.g. `build.yml`).'
+    required: false
+    default: 'build.yml'
+
+runs:
+  using: 'composite'
+  steps:
+  - name: Install GitHub CLI
+    uses: ksivamuthu/actions-setup-gh-cli@c78dbed4be2f8d6133a14a9a597ee12fd4ed5c93 # v3
+
+  - name: Wait for and monitor rendered repo workflow
+    env:
+      GITHUB_TOKEN: ${{ inputs.github-token }}
+    run: |
+      set -e
+
+      BRANCH="template-update/${{ github.event.pull_request.number }}"
+      REPO="${{ inputs.rendered-template-repo }}"
+      WORKFLOW="build.yml"
+      TIMEOUT_MINUTES=30
+      POLL_INTERVAL=10
+
+      echo "Monitoring workflow status for branch: $BRANCH in repo: $REPO"
+      echo "Timeout: $TIMEOUT_MINUTES minutes"
+
+      START_TIME=$(date +%s)
+      TIMEOUT_SECONDS=$((TIMEOUT_MINUTES * 60))
+
+      # Wait a bit for the workflow to start
+      echo "Waiting for workflow to start..."
+      sleep 15
+
+      while true; do
+        CURRENT_TIME=$(date +%s)
+        ELAPSED=$((CURRENT_TIME - START_TIME))
+
+        if [ $ELAPSED -gt $TIMEOUT_SECONDS ]; then
+          echo "::error::Timeout waiting for rendered repo workflow after $TIMEOUT_MINUTES minutes"
+          exit 1
+        fi
+
+        # Get the latest workflow run for this branch
+        RUNS=$(gh run list \
+          --repo "$REPO" \
+          --branch "$BRANCH" \
+          --workflow "$WORKFLOW" \
+          --json status,conclusion,databaseId \
+          --limit 1)
+
+        if [ "$(echo "$RUNS" | jq '. | length')" -eq 0 ]; then
+          echo "No workflow runs found yet. Waiting $POLL_INTERVAL seconds..."
+          sleep $POLL_INTERVAL
+          continue
+        fi
+
+        STATUS=$(echo "$RUNS" | jq -r '.[0].status')
+        CONCLUSION=$(echo "$RUNS" | jq -r '.[0].conclusion')
+        RUN_ID=$(echo "$RUNS" | jq -r '.[0].databaseId')
+
+        echo "Workflow run ID: $RUN_ID"
+        echo "Status: $STATUS"
+        echo "Conclusion: $CONCLUSION"
+
+        if [ "$STATUS" = "completed" ]; then
+          if [ "$CONCLUSION" = "success" ]; then
+            echo "✅ Rendered repo workflow completed successfully!"
+            exit 0
+          else
+            echo "::error::❌ Rendered repo workflow failed with conclusion: $CONCLUSION"
+            echo "::error::View the failed workflow at: https://github.com/$REPO/actions/runs/$RUN_ID"
+            exit 1
+          fi
+        fi
+
+        echo "Workflow still running. Waiting $POLL_INTERVAL seconds..."
+        sleep $POLL_INTERVAL
+      done
