@@ -36,9 +36,9 @@ on:
 
 jobs:
   manage-rendered-template-pr:
-    uses: eidp/actions-template/.github/workflows/auto-merge-rendered-template-pr.yml@v0
+    uses: eidp/actions-template/.github/workflows/auto-manage-rendered-template-pr.yml@v0
     with:
       template-manager-app-id: ${{ secrets.TEMPLATE_MANAGER_APP_ID }}
       rendered-template-repo: 'your-rendered-repo'
     secrets:
-      template-manager-app-pem-file: ${{ secrets.TEMPLATE_MANAGER_APP_PEM_FILE }}
+      template-manager-app-pem-file: ${{ secrets.TEMPLATE_MANAGER_GITHUB_APP_PEM_FILE }}
