@@ -27,6 +27,7 @@ runs:
     uses: ksivamuthu/actions-setup-gh-cli@c78dbed4be2f8d6133a14a9a597ee12fd4ed5c93 # v3
 
   - name: Wait for and monitor rendered repo workflow
+    shell: bash
     env:
       GITHUB_TOKEN: ${{ inputs.github-token }}
     run: |

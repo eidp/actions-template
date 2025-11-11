@@ -17,6 +17,14 @@ inputs:
     required: false
     default: 'rendered-repo'
 
+outputs:
+  pull-request-number:
+    description: 'The number of the created pull request.'
+    value: ${{ steps.create-pr.outputs.pull-request-number }}
+  branch-name:
+    description: 'The name of the branch for the created pull request.'
+    value: ${{ steps.create-pr.outputs.branch-name }}
+
 runs:
   using: 'composite'
   steps:
