@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/eidp/actions-template",
-  "commit": "63b67159db998a02f27ae674ba1aace5ba9cac13",
+  "commit": "f518fbe96bf1c37b83a8c37dd0bca1a8d2aa8b76",
   "checkout": "feat/template-actions",
   "context": {
     "cookiecutter": {
@@ -8,7 +8,7 @@
       "foo": "foo",
       "bar": "bar",
       "_template": "https://github.com/eidp/actions-template",
-      "_commit": "63b67159db998a02f27ae674ba1aace5ba9cac13"
+      "_commit": "f518fbe96bf1c37b83a8c37dd0bca1a8d2aa8b76"
     }
   },
   "directory": "./test/template"
