@@ -19,9 +19,9 @@ inputs:
     description: 'The rendered template repository to monitor (e.g. `python-fastapi`).'
     required: true
   rendered-template-workflow:
-    description: 'The workflow file name in the rendered template repository to monitor (e.g. `build.yml`).'
+    description: 'The workflow file name in the rendered template repository to monitor (e.g. `preview-env.yml`).'
     required: false
-    default: 'build.yml'
+    default: 'preview-env.yml'
 
 runs:
   using: 'composite'
