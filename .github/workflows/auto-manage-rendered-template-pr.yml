@@ -8,10 +8,6 @@ on:
         required: false
         type: string
         default: 'ubuntu-latest'
-      template-manager-app-id:
-        description: 'GitHub App ID for the Template Manager App'
-        required: true
-        type: string
       rendered-template-repo-owner:
         description: 'The owner of the rendered template repository (e.g. `eidp`).'
         required: true
@@ -21,6 +17,9 @@ on:
         required: true
         type: string
     secrets:
+      template-manager-app-id:
+        description: 'GitHub App ID for the Template Manager App'
+        required: true
       template-manager-app-pem-file:
         description: 'GitHub App PEM file for the Template Manager App'
         required: true
@@ -36,7 +35,7 @@ jobs:
         id: generate-token
         uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
         with:
-          app-id: ${{ inputs.template-manager-app-id }}
+          app-id: ${{ secrets.template-manager-app-id }}
           private-key: ${{ secrets.template-manager-app-pem-file }}
           owner: ${{ inputs.rendered-template-repo-owner }}
           repositories: ${{ inputs.rendered-template-repo }}
@@ -104,7 +103,7 @@ jobs:
         id: generate-token
         uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
         with:
-          app-id: ${{ inputs.template-manager-app-id }}
+          app-id: ${{ secrets.template-manager-app-id }}
           private-key: ${{ secrets.template-manager-app-pem-file }}
           owner: ${{ inputs.rendered-template-repo-owner }}
           repositories: ${{ inputs.rendered-template-repo }}
