@@ -10,6 +10,7 @@ The following GitHub Actions are available in this repository:
 
 - [create-rendered-template-pr](create-rendered-template-pr/README.md)
 - [monitor-rendered-template-workflow-status](monitor-rendered-template-workflow-status/README.md)
+- [test-template](test-template/README.md)
 - [update-rendered-template](update-rendered-template/README.md)
 
 <!-- END ACTIONS -->
