@@ -27,6 +27,11 @@ jobs:
         app-id: ${{ secrets.TEMPLATE_MANAGER_GITHUB_APP_ID }}
         private-key: ${{ secrets.TEMPLATE_MANAGER_GITHUB_APP_PEM_FILE }}
 
+    - name: test-template
+      uses: ./test-template
+      with:
+        template-path: 'test/template'
+
     - name: update-rendered-template
       uses: ./update-rendered-template
       with:
