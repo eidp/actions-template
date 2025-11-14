@@ -1,0 +1,11 @@
+name: template-build
+
+on:
+  pull_request:
+
+jobs:
+  template-build:
+    runs-on: kubernetes-runner
+    steps:
+    - name: Dummy step
+      run: echo "This is a dummy workflow to verify the rendered template PR workflow status."

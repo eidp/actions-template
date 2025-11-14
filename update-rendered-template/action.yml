@@ -1,0 +1,127 @@
+name: 'Update rendered template'
+description: |
+  This action clones the rendered template repository and updates the rendered template based on changes in the current branch of the template repository.
+  It does not create a pull request; that is handled by a separate action. 
+  It only clones the rendered repository and applies updates.
+
+  It uses `cruft` to apply updates from the template repository to the rendered repository.
+  If there are merge conflicts, the action will attempt to resolve them by accepting incoming changes.
+  If manual intervention is required, the action will fail and provide details in the logs.
+
+author: EIDP
+branding:
+  color: 'green'
+  icon: 'git-branch'
+
+inputs:
+  github-token:
+    description: 'GitHub token for authentication. It must have permissions to read and write to the rendered repository. A GitHub App token is recommended.'
+    required: true
+  rendered-template-repo-owner:
+    description: 'The owner of the rendered template repository to update (e.g. `eidp`).'
+    required: true
+  rendered-template-repo:
+    description: 'The rendered template repository to update (e.g. `eidp/python-fastapi`).'
+    required: true
+  rendered-repo-path:
+    description: 'Path to clone the rendered repository to.'
+    required: false
+    default: 'rendered-repo'
+  rendered-template-path:
+    description: 'The path in the rendered template repository where the rendered template files and the .cruft.json file are located. If not specified, the root of the rendered template repository is used.'
+    required: false
+    default: ''
+  rendered-template-branch:
+    description: 'The branch in the rendered template repository to update. If not specified, the default branch of the rendered template repository is used.'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+  - name: Checkout rendered repository
+    uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+    with:
+      repository: ${{ inputs.rendered-template-repo-owner }}/${{ inputs.rendered-template-repo }}
+      token: ${{ inputs.github-token }}
+      path: rendered-repo
+      fetch-depth: '0' # Fetch all history for cruft to work properly
+      ref: ${{ inputs.rendered-template-branch }}
+
+  - name: Set up Python
+    uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+    with:
+      python-version: '3.14'
+
+  - name: Configure git credentials for cruft
+    shell: bash
+    env:
+      GITHUB_TOKEN: ${{ inputs.github-token }}
+    run: |
+      # Configure git to use the token for HTTPS authentication
+      git config --global credential.helper store
+      echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+
+  - name: set up Template as remote
+    shell: bash
+    working-directory: ${{ inputs.rendered-repo-path }}
+    run: |
+      set -e
+
+      git remote add template ${{ github.server_url }}/${{ github.repository }}
+      git fetch template
+
+  - name: Install cruft
+    shell: bash
+    run: pip install cruft
+
+  - name: Run cruft update
+    id: cruft-update
+    shell: bash
+    working-directory: ${{ inputs.rendered-repo-path }}
+    run: |
+      set -e
+
+      # Get the template branch from the PR
+      TEMPLATE_BRANCH="${{ github.head_ref }}"
+      if [[ -n "${{ inputs.rendered-template-path }}" ]]; then
+        PROJECT_DIR_OPTION="--project-dir ${{ inputs.rendered-template-path }}"
+      else
+        PROJECT_DIR_OPTION=""
+      fi
+
+      echo "Running cruft update with branch: $TEMPLATE_BRANCH"
+
+      # Run cruft update
+      if ! cruft update --checkout "$TEMPLATE_BRANCH" $PROJECT_DIR_OPTION --skip-apply-ask; then
+        echo "::error::Cruft update failed. This likely means there are merge conflicts that require manual intervention."
+        exit 1
+      fi
+
+      # Check for rejection files created by cruft
+      if find . -name "*.rej" -type f | grep -q .; then
+        echo "::error::Cruft update created rejection files indicating merge conflicts:"
+        find . -name "*.rej" -type f -exec echo "  - {}" \;
+        echo "::error::Manual intervention is required to resolve these conflicts."
+        exit 1
+      fi
+
+      echo "Cruft update completed successfully"
+
+  - name: Resolve any conflicts by accepting incoming changes
+    shell: bash
+    working-directory: ${{ inputs.rendered-repo-path }}
+    run: |
+      set -e
+
+      if git ls-files -u | grep -q .; then
+        echo "Merge conflicts detected. Attempting to resolve by accepting incoming changes."
+
+        # Accept incoming changes for all files
+        git checkout --theirs .
+
+        # Add resolved files to staging
+        git add .
+      else 
+        echo "No merge conflicts detected."
+      fi
