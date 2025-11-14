@@ -31,67 +31,66 @@ jobs:
     runs-on: kubernetes-runner
 
     steps:
-      - name: Generate GitHub App token
-        id: generate-token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
-        with:
-          app-id: ${{ secrets.template-manager-app-id }}
-          private-key: ${{ secrets.template-manager-app-pem-file }}
-          owner: ${{ inputs.rendered-template-repo-owner }}
-          repositories: ${{ inputs.rendered-template-repo }}
+    - name: Generate GitHub App token
+      id: generate-token
+      uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+      with:
+        app-id: ${{ secrets.template-manager-app-id }}
+        private-key: ${{ secrets.template-manager-app-pem-file }}
+        owner: ${{ inputs.rendered-template-repo-owner }}
+        repositories: ${{ inputs.rendered-template-repo }}
 
-      - name: Install GitHub CLI
-        uses: ksivamuthu/actions-setup-gh-cli@c78dbed4be2f8d6133a14a9a597ee12fd4ed5c93 # v3
-
-      - name: Find and auto-merge rendered repo PR
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: |
-          set -e
-
-          BRANCH="template-update/${{ github.event.pull_request.number }}"
-          REPO="${{ github.repository_owner }}/${{ inputs.rendered-template-repo }}"
-
-          echo "Looking for PR with branch: $BRANCH in repo: $REPO"
-
-          # Find the PR by branch name
-          PR_NUMBER=$(gh pr list \
-            --repo "$REPO" \
-            --head "$BRANCH" \
-            --json number \
-            --jq '.[0].number')
-
-          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
-            echo "::warning::No corresponding PR found in rendered repo with branch $BRANCH"
-            echo "This might be expected if the rendered repo PR was already merged or closed."
-            exit 0
-          fi
-
-          echo "Found PR #$PR_NUMBER in rendered repo"
-
-          # Check PR state
-          PR_STATE=$(gh pr view "$PR_NUMBER" \
-            --repo "$REPO" \
-            --json state \
-            --jq '.state')
-
-          echo "PR state: $PR_STATE"
-
-          if [ "$PR_STATE" != "OPEN" ]; then
-            echo "::warning::PR #$PR_NUMBER is not open (state: $PR_STATE). Skipping auto-merge."
-            exit 0
-          fi
-
-          # Enable auto-merge
-          echo "Enabling auto-merge for PR #$PR_NUMBER..."
-          gh pr merge "$PR_NUMBER" \
-            --repo "$REPO" \
-            --auto \
-            --merge
-
-          echo "✅ Auto-merge enabled for PR #$PR_NUMBER"
-          echo "The PR will be automatically merged once all required status checks pass and any required reviews are approved."
+    - name: Find and auto-merge rendered repo PR
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ steps.generate-token.outputs.token }}
+        script: |
+          const branch = `template-update/${{ github.event.pull_request.number }}`;
+          const owner = '${{ github.repository_owner }}';
+          const repo = '${{ inputs.rendered-template-repo }}';
+          
+          core.info(`Looking for PR with branch: ${branch} in repo: ${owner}/${repo}`);
+          
+          // Find the PR by branch name
+          const { data: prs } = await github.rest.pulls.list({
+            owner,
+            repo,
+            head: `${owner}:${branch}`,
+            state: 'open'
+          });
+          
+          if (prs.length === 0) {
+            core.warning(`No corresponding PR found in rendered repo with branch ${branch}`);
+            core.info('This might be expected if the rendered repo PR was already merged or closed.');
+            return;
+          }
+          
+          const pr = prs[0];
+          core.info(`Found PR #${pr.number} in rendered repo`);
+          core.info(`PR state: ${pr.state}`);
+          
+          if (pr.state !== 'open') {
+            core.warning(`PR #${pr.number} is not open (state: ${pr.state}). Skipping auto-merge.`);
+            return;
+          }
+          
+          // Enable auto-merge using GraphQL API
+          core.info(`Enabling auto-merge for PR #${pr.number}...`);
+          await github.graphql(`
+            mutation($pullRequestId: ID!) {
+              enablePullRequestAutoMerge(input: {
+                pullRequestId: $pullRequestId,
+                mergeMethod: MERGE
+              }) {
+                clientMutationId
+              }
+            }
+          `, {
+            pullRequestId: pr.node_id
+          });
+          
+          core.info(`✅ Auto-merge enabled for PR #${pr.number}`);
+          core.info('The PR will be automatically merged once all required status checks pass and any required reviews are approved.');
 
   auto-close:
     # Only run if the PR was closed and not merged
@@ -99,60 +98,66 @@ jobs:
     runs-on: kubernetes-runner
 
     steps:
-      - name: Generate GitHub App token
-        id: generate-token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
-        with:
-          app-id: ${{ secrets.template-manager-app-id }}
-          private-key: ${{ secrets.template-manager-app-pem-file }}
-          owner: ${{ inputs.rendered-template-repo-owner }}
-          repositories: ${{ inputs.rendered-template-repo }}
+    - name: Generate GitHub App token
+      id: generate-token
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        app-id: ${{ secrets.template-manager-app-id }}
+        private-key: ${{ secrets.template-manager-app-pem-file }}
+        owner: ${{ inputs.rendered-template-repo-owner }}
+        repositories: ${{ inputs.rendered-template-repo }}
 
-      - name: Install GitHub CLI
-        uses: ksivamuthu/actions-setup-gh-cli@c78dbed4be2f8d6133a14a9a597ee12fd4ed5c93 # v3
-
-      - name: Find and close rendered repo PR
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: |
-          set -e
-
-          BRANCH="template-update/${{ github.event.pull_request.number }}"
-          REPO="${{ github.repository_owner }}/${{ inputs.rendered-template-repo }}"
-
-          echo "Looking for PR with branch: $BRANCH in repo: $REPO"
-
-          # Find the PR by branch name
-          PR_NUMBER=$(gh pr list \
-            --repo "$REPO" \
-            --head "$BRANCH" \
-            --json number \
-            --jq '.[0].number')
-
-          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
-            echo "::warning::No corresponding PR found in rendered repo with branch $BRANCH"
-            echo "This might be expected if the rendered repo PR was already merged or closed."
-            exit 0
-          fi
-
-          echo "Found PR #$PR_NUMBER in rendered repo"
-
-          # Check PR state
-          PR_STATE=$(gh pr view "$PR_NUMBER" \
-            --repo "$REPO" \
-            --json state \
-            --jq '.state')
-
-          echo "PR state: $PR_STATE"
-
-          if [ "$PR_STATE" != "OPEN" ]; then
-            echo "::warning::PR #$PR_NUMBER is not open (state: $PR_STATE). Skipping close."
-            exit 0
-          fi
-
-          # Close the PR
-          echo "Closing PR #$PR_NUMBER..."
-          gh pr close "$PR_NUMBER" \
-            --repo "$REPO" \
-            --delete-branch
+    - name: Find and close rendered repo PR
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      with:
+        github-token: ${{ steps.generate-token.outputs.token }}
+        script: |
+          const branch = `template-update/${{ github.event.pull_request.number }}`;
+          const owner = '${{ github.repository_owner }}';
+          const repo = '${{ inputs.rendered-template-repo }}';
+          
+          core.info(`Looking for PR with branch: ${branch} in repo: ${owner}/${repo}`);
+          
+          // Find the PR by branch name
+          const { data: prs } = await github.rest.pulls.list({
+            owner,
+            repo,
+            head: `${owner}:${branch}`,
+            state: 'open'
+          });
+          
+          if (prs.length === 0) {
+            core.warning(`No corresponding PR found in rendered repo with branch ${branch}`);
+            core.info('This might be expected if the rendered repo PR was already merged or closed.');
+            return;
+          }
+          
+          const pr = prs[0];
+          core.info(`Found PR #${pr.number} in rendered repo`);
+          core.info(`PR state: ${pr.state}`);
+          
+          if (pr.state !== 'open') {
+            core.warning(`PR #${pr.number} is not open (state: ${pr.state}). Skipping close.`);
+            return;
+          }
+          
+          // Close the PR
+          core.info(`Closing PR #${pr.number}...`);
+          await github.rest.pulls.update({
+            owner,
+            repo,
+            pull_number: pr.number,
+            state: 'closed'
+          });
+          
+          // Delete the branch
+          try {
+            await github.rest.git.deleteRef({
+              owner,
+              repo,
+              ref: `heads/${branch}`
+            });
+            core.info(`Deleted branch ${branch}`);
+          } catch (error) {
+            core.warning(`Failed to delete branch ${branch}: ${error.message}`);
+          }
