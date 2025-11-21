@@ -93,7 +93,7 @@ runs:
       echo "Running cruft update with branch: $TEMPLATE_BRANCH"
 
       # Run cruft update
-      if ! cruft update --checkout "$TEMPLATE_BRANCH" $PROJECT_DIR_OPTION --skip-apply-ask; then
+      if ! cruft update --checkout "$TEMPLATE_BRANCH" $PROJECT_DIR_OPTION --skip-apply-ask --not-strict; then
         echo "::error::Cruft update failed. This likely means there are merge conflicts that require manual intervention."
         exit 1
       fi
