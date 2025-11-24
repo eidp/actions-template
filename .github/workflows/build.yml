@@ -41,6 +41,7 @@ jobs:
         rendered-template-repo: ${{ github.event.repository.name }}
         rendered-template-path: './test/actions-template-test'
         rendered-template-branch: ${{ github.head_ref }}
+        update-cruft-metadata: 'true'
 
     - name: verify rendered template updated
       working-directory: ${{ env.RENDERED_REPO_PATH }}

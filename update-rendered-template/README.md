@@ -19,6 +19,8 @@ If manual intervention is required, the action will fail and provide details in 
 |`rendered-repo-path`           |Path to clone the rendered repository to.                                                                                                                                                    |No      |`rendered-repo` |
 |`rendered-template-path`       |The path in the rendered template repository where the rendered template files and the .cruft.json file are located. If not specified, the root of the rendered template repository is used. |No      |``              |
 |`rendered-template-branch`     |The branch in the rendered template repository to update. If not specified, the default branch of the rendered template repository is used.                                                  |No      |``              |
+|`update-cruft-metadata`        |If false, reverts .cruft.json after running cruft update to avoid committing commit references from PR branches that will become orphaned after merge.                                       |No      |`false`         |
+|`template-branch`              |The branch in the template repository to update from. If not specified, uses the current PR branch (github.head_ref) or defaults to main.                                                    |No      |``              |
 
 ## 📤 Outputs
 
