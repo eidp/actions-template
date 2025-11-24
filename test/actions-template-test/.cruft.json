@@ -1,14 +1,14 @@
 {
   "template": "https://github.com/eidp/actions-template",
-  "commit": "63b67159db998a02f27ae674ba1aace5ba9cac13",
-  "checkout": "feat/template-actions",
+  "commit": "90fd1784057a5e2f8e2a0d872efffb0c5b93f81c",
+  "checkout": "renovate/eidp-actions-template-digest",
   "context": {
     "cookiecutter": {
       "project_slug": "actions-template-test",
       "foo": "foo",
       "bar": "bar",
       "_template": "https://github.com/eidp/actions-template",
-      "_commit": "63b67159db998a02f27ae674ba1aace5ba9cac13"
+      "_commit": "90fd1784057a5e2f8e2a0d872efffb0c5b93f81c"
     }
   },
   "directory": "./test/template"
