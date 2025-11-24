@@ -35,6 +35,14 @@ inputs:
     description: 'The branch in the rendered template repository to update. If not specified, the default branch of the rendered template repository is used.'
     required: false
     default: ''
+  update-cruft-metadata:
+    description: 'If false, reverts .cruft.json after running cruft update to avoid committing commit references from PR branches that will become orphaned after merge.'
+    required: false
+    default: 'false'
+  template-branch:
+    description: 'The branch in the template repository to update from. If not specified, uses the current PR branch (github.head_ref) or defaults to main.'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -82,8 +90,16 @@ runs:
     run: |
       set -e
 
-      # Get the template branch from the PR
-      TEMPLATE_BRANCH="${{ github.head_ref }}"
+      # Get the template branch - use input parameter, PR branch, or default branch
+      if [[ -n "${{ inputs.template-branch }}" ]]; then
+        TEMPLATE_BRANCH="${{ inputs.template-branch }}"
+      elif [[ -n "${{ github.head_ref }}" ]]; then
+        TEMPLATE_BRANCH="${{ github.head_ref }}"
+      else
+        echo "::warning:: No template branch input or PR branch found, using default branch of template repository"
+        TEMPLATE_BRANCH="${{ github.event.repository.default_branch }}"
+      fi
+
       if [[ -n "${{ inputs.rendered-template-path }}" ]]; then
         PROJECT_DIR_OPTION="--project-dir ${{ inputs.rendered-template-path }}"
       else
@@ -122,6 +138,28 @@ runs:
 
         # Add resolved files to staging
         git add .
-      else 
+      else
         echo "No merge conflicts detected."
+      fi
+
+  - name: Revert .cruft.json if skip-cruft-json-update is enabled
+    if: inputs.update-cruft-metadata == 'false'
+    shell: bash
+    working-directory: ${{ inputs.rendered-repo-path }}
+    run: |
+      set -e
+
+      echo "Reverting .cruft.json to avoid orphaned commit references"
+
+      if [[ -n "${{ inputs.rendered-template-path }}" ]]; then
+        CRUFT_JSON_PATH="${{ inputs.rendered-template-path }}/.cruft.json"
+      else
+        CRUFT_JSON_PATH=".cruft.json"
+      fi
+
+      if [[ -f "$CRUFT_JSON_PATH" ]]; then
+        git restore "$CRUFT_JSON_PATH" || git checkout HEAD -- "$CRUFT_JSON_PATH"
+        echo "Reverted $CRUFT_JSON_PATH"
+      else
+        echo "No .cruft.json file found at $CRUFT_JSON_PATH"
       fi
