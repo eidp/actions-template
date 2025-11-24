@@ -28,7 +28,7 @@ jobs:
   auto-merge:
     # Only run if the PR was merged, not just closed
     if: github.event.pull_request.merged == true
-    runs-on: kubernetes-runner
+    runs-on: ${{ inputs.runs-on }}
 
     steps:
     - name: Generate GitHub App token
@@ -46,7 +46,7 @@ jobs:
         github-token: ${{ steps.generate-token.outputs.token }}
         script: |
           const branch = `template-update/${{ github.event.pull_request.number }}`;
-          const owner = '${{ github.repository_owner }}';
+          const owner = '${{ inputs.rendered-template-repo-owner }}';
           const repo = '${{ inputs.rendered-template-repo }}';
           
           core.info(`Looking for PR with branch: ${branch} in repo: ${owner}/${repo}`);
@@ -172,12 +172,13 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
         git add .cruft.json
-        git commit -m "chore: update .cruft.json to reference main branch commit
+        git commit -m "chore: update .cruft.json to reference main branch commit"
+        git push origin main
 
   auto-close:
     # Only run if the PR was closed and not merged
     if: github.event.pull_request.merged == false
-    runs-on: kubernetes-runner
+    runs-on: ${{ inputs.runs-on }}
 
     steps:
     - name: Generate GitHub App token
@@ -195,9 +196,9 @@ jobs:
         github-token: ${{ steps.generate-token.outputs.token }}
         script: |
           const branch = `template-update/${{ github.event.pull_request.number }}`;
-          const owner = '${{ github.repository_owner }}';
+          const owner = '${{ inputs.rendered-template-repo-owner }}';
           const repo = '${{ inputs.rendered-template-repo }}';
-          
+
           core.info(`Looking for PR with branch: ${branch} in repo: ${owner}/${repo}`);
 
           // Find the PR by branch name
