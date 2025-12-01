@@ -148,7 +148,7 @@ jobs:
           core.warning(`Timeout waiting for PR to merge after ${maxAttempts * 10} seconds`);
 
     - name: Update rendered template from main branch
-      uses: eidp/actions-template/update-rendered-template@624366e3c476ab0774f31828ff3e9d36a2650b58
+      uses: eidp/actions-template/update-rendered-template@62d45f5543363c808062b6d01b770211da2fe3a9
       with:
         github-token: ${{ steps.generate-token.outputs.token }}
         rendered-template-repo-owner: ${{ inputs.rendered-template-repo-owner }}
