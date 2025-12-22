@@ -9,20 +9,22 @@ The diagram below illustrates the flow between the template repository, the rend
 
 ```mermaid
 graph TB
-    subgraph "Template Repository"
+    subgraph "Template Repo"
         A[<strong>typescript-react-template</strong><br/>Contains cookiecutter.json<br/>and template files]
         B[Changes to template]
     end
 
-    subgraph "Rendered Template Repository"
+    subgraph "Rendered Template Repo"
         C[<strong>typescript-react</strong><br/>Project created with cruft]
         D[.cruft.json<br/>Links to template repo]
     end
 
     subgraph "Update Process"
-        E[Template PR created]
+        E[Create PR in template repo]
         F["<strong>update-rendered-template</strong><br/><em>action</em><br/>Clones rendered repo<br/>Runs cruft update"]
-        G["<strong>create-rendered-template-pr</strong><br/><em>action</em><br/>Creates PR in rendered repo"]
+        G["<strong>create-rendered-template-pr</strong><br/><em>action</em><br/>Creates PR in rendered template repo"]
+        I["<strong>monitor-rendered-template-workflow-status</strong><br/><em>action</em><br/>Monitors the pipeline of the rendered template PR"]
+        J[Review template repo PR and merge or close]
         H["<strong>auto-manage-rendered-template-pr</strong><br/><em>workflow</em><br/>Merges or closes PR<br/>Updates .cruft.json after merge"]
     end
 
@@ -33,14 +35,15 @@ graph TB
         L4[Reusable workflow]
     end
 
-    A -->|cruft create| C
+    A -->|cruft create,one time manual action to initialize| C
     C -->|maintains link via| D
     B --> E
-    E --> F
-    F -->|applies updates| C
-    F --> G
-    G -->|monitors| H
-    H -->|template PR merged?| C
+    E --> |triggers| F
+    F -->|if successful| G
+    G --> |if successful|I
+    I --> |if successful|J
+    J --> |PR merged or closed|H
+    H -->|new template updates applied to rendered template repo| C
     D -.->|tracks template commit| A
 
     style A fill:#e1f5ff
@@ -49,6 +52,7 @@ graph TB
     style F fill:#d4f1d4
     style G fill:#d4f1d4
     style H fill:#e8d4f1
+    style I fill:#d4f1d4
     style L1 fill:#e1f5ff
     style L2 fill:#fff5e1
     style L3 fill:#d4f1d4
@@ -57,11 +61,14 @@ graph TB
 
 ### How it works
 
-1. **Template repository** (e.g., `typescript-react-template`) contains the cookiecutter template with `{{cookiecutter.*}}` variables
-2. **Rendered repository** (e.g., `typescript-react`) is created using `cruft create` and maintains a `.cruft.json` file linking back to the template
-3. When changes are made to the template, the `update-rendered-template` action uses cruft to apply those changes to the rendered repository
-4. The `create-rendered-template-pr` action creates a PR in the rendered repository with the updates
-5. The `auto-manage-rendered-template-pr` workflow automatically merges or closes the PR based on the template PR status. It also updates the `.cruft.json` file to point to the latest commit in the template repository after merging
+-  **Template repository** (e.g., `typescript-react-template`) contains the cookiecutter template with `{{cookiecutter.*}}` variables
+-  **Rendered repository** (e.g., `typescript-react`) is created using `cruft create` and maintains a `.cruft.json` file linking back to the template
+
+1. When a PR is created on the **template repository**, the `update-rendered-template` action uses cruft to apply the changes that the PR contains to a clone of the **rendered repository**. This triggers the `create-rendered-template-pr`.
+1. The `create-rendered-template-pr` action creates a PR in the **rendered repository** with the updates.
+1. The `monitor-rendered-template-workflow-status` is triggered and monitors the rendered template workflow status.
+1. The PR on the **template repository** is reviewed by a team member and merged or closed, and triggers the `auto-manage-rendered-template-pr` workflow.
+1. The `auto-manage-rendered-template-pr` workflow mirrors the **template repository** PR status to the **rendered repository** PR (merged -> merged, closed -> closed). It also updates the `.cruft.json` file to point to the latest commit in the template repository after merging.
 
 <!-- BEGIN ACTIONS -->
 
