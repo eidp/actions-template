@@ -1,14 +1,14 @@
 {
   "template": "https://github.com/eidp/actions-template",
-  "commit": "63b67159db998a02f27ae674ba1aace5ba9cac13",
-  "checkout": "feat/template-actions",
+  "commit": "b2558c4e088c0c60c37936ea207fdd61fae916e6",
+  "checkout": "renovate/peter-evans-create-pull-request-8-x",
   "context": {
     "cookiecutter": {
       "project_slug": "actions-template-test",
       "foo": "foo",
       "bar": "bar",
       "_template": "https://github.com/eidp/actions-template",
-      "_commit": "63b67159db998a02f27ae674ba1aace5ba9cac13"
+      "_commit": "b2558c4e088c0c60c37936ea207fdd61fae916e6"
     }
   },
   "directory": "./test/template"
