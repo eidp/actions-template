@@ -1,14 +1,14 @@
 {
   "template": "https://github.com/eidp/actions-template",
-  "commit": "63b67159db998a02f27ae674ba1aace5ba9cac13",
-  "checkout": "feat/template-actions",
+  "commit": "68a082edcf2e5b55e7381d2bcf0390c0d13a1023",
+  "checkout": "renovate/actions-setup-python-6-x",
   "context": {
     "cookiecutter": {
       "project_slug": "actions-template-test",
       "foo": "foo",
       "bar": "bar",
       "_template": "https://github.com/eidp/actions-template",
-      "_commit": "63b67159db998a02f27ae674ba1aace5ba9cac13"
+      "_commit": "68a082edcf2e5b55e7381d2bcf0390c0d13a1023"
     }
   },
   "directory": "./test/template"
