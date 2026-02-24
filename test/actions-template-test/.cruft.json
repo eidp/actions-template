@@ -1,14 +1,14 @@
 {
   "template": "https://github.com/eidp/actions-template",
-  "commit": "63b67159db998a02f27ae674ba1aace5ba9cac13",
-  "checkout": "feat/template-actions",
+  "commit": "e5cd091f8c6c53e29ad4b6c4ab651f4c570b1c9a",
+  "checkout": "chore/stagger-renovate-schedule",
   "context": {
     "cookiecutter": {
       "project_slug": "actions-template-test",
       "foo": "foo",
       "bar": "bar",
       "_template": "https://github.com/eidp/actions-template",
-      "_commit": "63b67159db998a02f27ae674ba1aace5ba9cac13"
+      "_commit": "e5cd091f8c6c53e29ad4b6c4ab651f4c570b1c9a"
     }
   },
   "directory": "./test/template"
