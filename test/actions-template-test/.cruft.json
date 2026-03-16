@@ -1,14 +1,14 @@
 {
   "template": "https://github.com/eidp/actions-template",
-  "commit": "63b67159db998a02f27ae674ba1aace5ba9cac13",
-  "checkout": "feat/template-actions",
+  "commit": "00b35ab5b720f79512bdfac58586985797e8c0d8",
+  "checkout": "renovate/actions-create-github-app-token-3-x",
   "context": {
     "cookiecutter": {
       "project_slug": "actions-template-test",
       "foo": "foo",
       "bar": "bar",
       "_template": "https://github.com/eidp/actions-template",
-      "_commit": "63b67159db998a02f27ae674ba1aace5ba9cac13"
+      "_commit": "00b35ab5b720f79512bdfac58586985797e8c0d8"
     }
   },
   "directory": "./test/template"
